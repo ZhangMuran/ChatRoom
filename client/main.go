@@ -40,9 +40,9 @@ func main() {
 		fmt.Scanln(&password)
 		err := login(account, password)
 		if err != nil {
-
+			fmt.Println(err)
 		} else {
-			fmt.Println("登陆成功")
+			fmt.Println("登陆操作完成")
 		}
 	} else if num ==2 {
 

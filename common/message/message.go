@@ -21,6 +21,6 @@ type LoginMessage struct {
 }
 
 type LoginRspMesssage struct {
-	code int
-	status string
+	Code int
+	Status string
 }

@@ -10,27 +10,43 @@ import (
 	"net"
 )
 
-func processLogin(msg *message.Message) (err error) {
+func processLogin(conn net.Conn, msg *message.Message) (err error) {
 	var loginMsg message.LoginMessage
 	err = json.Unmarshal([]byte(msg.Content), &loginMsg)
 	if err != nil {
 		err = errors.New("反序列化LoginMessage失败")
+		return
 	}
 
-	// var loginRsp message.LoginRspMesssage
+	var loginRsp message.LoginRspMesssage
 	if loginMsg.Account == "admin" && loginMsg.Password == "password" {
-
-
+		loginRsp.Code = message.LoginSuccess
+		loginRsp.Status = "OK"
 	} else {
-		fmt.Println("登陆失败！")
+		loginRsp.Code = message.LoginUserNotExist
+		loginRsp.Status = "ERROR"
 	}
+
+	loginRspslice, err := json.Marshal(loginRsp)
+	if err != nil {
+		err =  errors.New("序列化LoginRspMessage失败")
+		return
+	}
+	sendMsg := message.Message{Type: message.LoginRspType, Content: string(loginRspslice)}
+	sendMsgSlice, err := json.Marshal(sendMsg)
+	err = packio.SendPack(conn, sendMsgSlice)
+	if err != nil {
+		err = errors.New("发送LoginRspMessage失败")
+		return
+	}
+
 	return
 }
 
-func processMsg(msg *message.Message) (err error) {
+func processMsg(conn net.Conn, msg *message.Message) (err error) {
 	switch msg.Type {
-		case message.LoginRspType :
-			err = processLogin(msg)
+		case message.LoginType :
+			err = processLogin(conn, msg)
 		default :
 			err = errors.New("不存在的msg类型")	
 	}
@@ -48,8 +64,7 @@ func clientConn(conn net.Conn) {
 			}
 			fmt.Println("接收报文过程出错！err =", err)
 		}
-		// fmt.Println(msg)
-		err = processMsg(&msg)
+		err = processMsg(conn, &msg)
 	}
 }
 
