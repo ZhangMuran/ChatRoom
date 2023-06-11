@@ -14,7 +14,7 @@ func main() {
 		fmt.Println("\t\t2. 注册账号")
 		fmt.Println("\t\t3. 退出程序")
 		fmt.Println("------------------------------------------")
-		fmt.Scanf("%d", &num)
+		fmt.Scanln(&num)
 		switch num{
 			case 1 :
 				fmt.Println("正在准备登陆...")

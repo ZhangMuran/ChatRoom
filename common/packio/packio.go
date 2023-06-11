@@ -13,12 +13,8 @@ func SendPack(conn net.Conn, data []byte) (err error) {
 	// 为了避免丢包，在发送数据时先发送数据的长度
 	msgLen := len(data)
 	lenStr := strconv.Itoa(msgLen)
-	_, err = conn.Write([]byte(lenStr))
-	if err != nil {
-		err = errors.New("发送报文长度时出错")
-		return
-	}
 	// 再将数据发送过去
+	data = append([]byte(lenStr), data...)
 	_, err = conn.Write(data)
 	if err != nil {
 		err = errors.New("发送报文内容时出错")
