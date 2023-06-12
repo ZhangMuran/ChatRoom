@@ -35,16 +35,21 @@ func (this *UserProcess)Login(account string, password string) (err error) {
 		err = errors.New("发送登陆消息过程中，序列化message失败")
 		return
 	}
-	err = packio.SendPack(conn, data)
+
+	pio := packio.PackIo{
+		Conn: conn,
+	}
+	err = pio.SendPack(data)
 	if err != nil {
 		err = errors.New("发送loginMessage包出错")
 		return
 	}
-	rspMsg, err := packio.RecvPack(conn)
+	rspMsg, err := pio.RecvPack()
 	if err != nil {
 		err = errors.New("接收loginRspMessage出错")
 		return
 	}
+	
 	var loginRspMsg message.LoginRspMesssage
 	err = json.Unmarshal([]byte(rspMsg.Content), &loginRspMsg)
 	if err != nil {

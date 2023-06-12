@@ -2,24 +2,31 @@ package packio
 
 import (
 	"chatroom/common/message"
+	"encoding/binary"
 	"encoding/json"
 	"errors"
 	"io"
 	"net"
-	"strconv"
 )
 
 type PackIo struct {
 	Conn net.Conn
+	buf [2048]byte
 }
 
-func SendPack(conn net.Conn, data []byte) (err error) {
-	// 为了避免丢包，在发送数据时先发送数据的长度
-	msgLen := len(data)
-	lenStr := strconv.Itoa(msgLen)
-	// 再将数据发送过去
-	data = append([]byte(lenStr), data...)
-	_, err = conn.Write(data)
+func (this *PackIo)SendPack(data []byte) (err error) {
+	// 为了避免粘包，在发送数据时先发送数据的长度
+	msgLen := uint32(len(data))
+	var byteslice [4]byte 
+	binary.BigEndian.PutUint32(byteslice[:], msgLen)
+
+	_, err = this.Conn.Write(byteslice[:])
+	if err != nil {
+		err = errors.New("发送报文长度时出错")
+		return
+	}
+
+	_, err = this.Conn.Write(data)
 	if err != nil {
 		err = errors.New("发送报文内容时出错")
 		return
@@ -27,31 +34,19 @@ func SendPack(conn net.Conn, data []byte) (err error) {
 	return
 }
 
-func RecvPack(conn net.Conn) (msg message.Message, err error){
-	var buf [1024]byte
-	lenBuf, err := conn.Read(buf[:])
+func (this *PackIo)RecvPack() (msg message.Message, err error){
+	_, err = this.Conn.Read(this.buf[:4])
 	if err != nil {
 		if err == io.EOF {
 			return
 		}
-		err = errors.New("读取报文过程出错")
+		err = errors.New("读取报文长度出错")
 		return
 	}
-	var numLen int
-	var msgStr []byte
-	for i := 0; i < lenBuf; i++ {
-		if buf[i] >= '0' && buf[i] <= '9' {
-			numLen = numLen * 10 + int(buf[i] - '0')
-		} else {
-			msgStr = buf[i:lenBuf]
-			break
-		}
-	}
-	if numLen != len(msgStr) {
-		err = errors.New("发生了丢包")
-		return
-	}
-	err = json.Unmarshal(msgStr[:], &msg)
+	numLen := binary.BigEndian.Uint32(this.buf[:4])
+
+	_, err = this.Conn.Read(this.buf[:numLen])
+	err = json.Unmarshal(this.buf[:numLen], &msg)
 	if err != nil {
 		err = errors.New("接受报文反序列化过程出错")
 		return

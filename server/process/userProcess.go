@@ -36,7 +36,12 @@ func (this *UserProcess)ProcessLogin(msg *message.Message) (err error) {
 	}
 	sendMsg := message.Message{Type: message.LoginRspType, Content: string(loginRspslice)}
 	sendMsgSlice, err := json.Marshal(sendMsg)
-	err = packio.SendPack(this.Conn, sendMsgSlice)
+
+	pio := &packio.PackIo{
+		Conn: this.Conn,
+	}
+
+	err = pio.SendPack(sendMsgSlice)
 	if err != nil {
 		err = errors.New("发送LoginRspMessage失败")
 		return

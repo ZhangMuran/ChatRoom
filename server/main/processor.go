@@ -16,8 +16,12 @@ type processor struct {
 
 func (this *processor)clientConn() {
 	defer this.conn.Close()
+	
+	pio := &packio.PackIo{
+		Conn: this.conn,
+	}
 	for {
-		msg, err := packio.RecvPack(this.conn)
+		msg, err := pio.RecvPack()
 		if err != nil {
 			if err == io.EOF {
 				fmt.Println("客户端断开了连接")
