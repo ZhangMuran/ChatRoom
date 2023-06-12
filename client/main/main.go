@@ -1,6 +1,7 @@
 package main
 
 import (
+	"chatroom/client/process"
 	"fmt"
 )
 
@@ -9,7 +10,7 @@ func main() {
 	isLoop := true
 	for {
 		fmt.Println("------------------------------------------")
-		fmt.Println("\t请输入：")
+		fmt.Println("\t请输入:")
 		fmt.Println("\t\t1. 登陆账号")
 		fmt.Println("\t\t2. 注册账号")
 		fmt.Println("\t\t3. 退出程序")
@@ -38,7 +39,9 @@ func main() {
 		fmt.Scanln(&account)
 		fmt.Println("请输入您的密码")
 		fmt.Scanln(&password)
-		err := login(account, password)
+		
+		pro := &process.UserProcess{}
+		err := pro.Login(account, password)
 		if err != nil {
 			fmt.Println(err)
 		} else {
