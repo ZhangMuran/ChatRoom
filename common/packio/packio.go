@@ -9,6 +9,10 @@ import (
 	"strconv"
 )
 
+type PackIo struct {
+	Conn net.Conn
+}
+
 func SendPack(conn net.Conn, data []byte) (err error) {
 	// 为了避免丢包，在发送数据时先发送数据的长度
 	msgLen := len(data)
