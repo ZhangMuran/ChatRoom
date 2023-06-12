@@ -1,4 +1,4 @@
-package main
+package process
 
 import (
 	"chatroom/common/message"
@@ -9,7 +9,11 @@ import (
 	"net"
 )
 
-func login(account string, password string) (err error) {
+type UserProcess struct {
+
+}
+
+func (this *UserProcess)Login(account string, password string) (err error) {
 	conn, err := net.Dial("tcp", "127.0.0.1:10000")
 	if err != nil {
 		return
@@ -17,7 +21,6 @@ func login(account string, password string) (err error) {
 	defer conn.Close()
 
 	userInfo := message.LoginMessage{Account:account, Password:password}
-
 	data, err := json.Marshal(userInfo)
 	if err != nil {
 		err = errors.New("序列化LoginMessage失败")
@@ -39,7 +42,6 @@ func login(account string, password string) (err error) {
 	}
 	rspMsg, err := packio.RecvPack(conn)
 	if err != nil {
-		fmt.Println(err)
 		err = errors.New("接收loginRspMessage出错")
 		return
 	}
