@@ -11,16 +11,16 @@ const (
 )
 
 type Message struct {
-	Type string
-	Content string
+	Type string    `json:"type"`
+	Content string `json:"content"`
 }
 
 type LoginMessage struct {
-	Account string
-	Password string
+	Account string  `json:"account"`
+	Password string `json:"password"`
 }
 
 type LoginRspMesssage struct {
-	Code int
-	Status string
+	Code int      `json:"code"`
+	Status string `json:"status"`
 }

@@ -49,7 +49,7 @@ func (this *UserProcess)Login(account string, password string) (err error) {
 		err = errors.New("接收loginRspMessage出错")
 		return
 	}
-	
+
 	var loginRspMsg message.LoginRspMesssage
 	err = json.Unmarshal([]byte(rspMsg.Content), &loginRspMsg)
 	if err != nil {
@@ -59,7 +59,7 @@ func (this *UserProcess)Login(account string, password string) (err error) {
 	if loginRspMsg.Status == "OK" {
 		fmt.Println("登陆成功，欢迎您admin")
 	} else {
-		fmt.Println("登陆失败，用户不存在")
+		fmt.Println(loginRspMsg.Status)
 	}
 
 	return nil
