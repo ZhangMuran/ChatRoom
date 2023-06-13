@@ -21,7 +21,7 @@ func (this *UserProcess)ProcessLogin(msg *message.Message) (err error) {
 		return
 	}
 
-	var loginRsp message.LoginRspMesssage
+	var loginRsp message.LoginRspMessage
 	loginRsp.Code = message.LoginSuccess
 
 	dao := model.GetUserDao()
@@ -51,5 +51,16 @@ func (this *UserProcess)ProcessLogin(msg *message.Message) (err error) {
 		return
 	}
 
+	return
+}
+
+func (this *UserProcess)ProcessRegister(msg *message.Message) (err error) {
+	var registerMsg message.RegisterMessage
+	err = json.Unmarshal([]byte(msg.Content), &registerMsg)
+	if err != nil {
+		err = errors.New("反序列化RegisterMessage失败")
+		return
+	}
+	
 	return
 }

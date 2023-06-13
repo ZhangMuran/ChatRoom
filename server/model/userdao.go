@@ -1,10 +1,10 @@
 package model
 
 import (
+	"chatroom/common/message"
 	"encoding/json"
 	"errors"
 	"fmt"
-
 	"github.com/gomodule/redigo/redis"
 )
 
@@ -21,7 +21,7 @@ func GetUserDao() *userDao {
 	return userDaoInstance
 }
 
-func (this *userDao)getUserByAccount(conn redis.Conn, account string) (userInfo User, err error) {
+func (this *userDao)getUserByAccount(conn redis.Conn, account string) (userInfo message.User, err error) {
 	uInfo, err := redis.String(conn.Do("hget", "users", account))
 	if err != nil {
 		if err == redis.ErrNil {

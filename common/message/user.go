@@ -1,4 +1,4 @@
-package model
+package message
 
 type User struct {
 	Account string  `json:"account"`

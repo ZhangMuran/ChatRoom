@@ -6,8 +6,10 @@ const (
 )
 
 const (
-	LoginType    = "LoginMessage"
-	LoginRspType = "LoginRspMesssage"
+	LoginType       = "LoginMessage"
+	LoginRspType    = "LoginRspMesssage"
+	RegisterType    = "RegisterMessage"
+	RegisterRspType = "RegisterRspMessage"
 )
 
 type Message struct {
@@ -20,7 +22,16 @@ type LoginMessage struct {
 	Password string `json:"password"`
 }
 
-type LoginRspMesssage struct {
+type LoginRspMessage struct {
+	Code int      `json:"code"`
+	Status string `json:"status"`
+}
+
+type RegisterMessage struct {
+	User User
+}
+
+type RegisterRspMessage struct {
 	Code int      `json:"code"`
 	Status string `json:"status"`
 }
