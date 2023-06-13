@@ -1,8 +1,10 @@
 package message
 
 const (
-	LoginSuccess      = 0
-	LoginUserNotExist = 1
+	LoginSuccess    = 0
+	LoginFail       = 1
+	RegisterSuccess = 10
+	RegisterFail    = 11
 )
 
 const (

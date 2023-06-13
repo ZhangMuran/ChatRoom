@@ -13,7 +13,7 @@ type UserProcess struct {
 
 }
 
-func (this *UserProcess)Login(account string, password string) (err error) {
+func (u *UserProcess)Login(account string, password string) (err error) {
 	conn, err := net.Dial("tcp", "127.0.0.1:10000")
 	if err != nil {
 		return
@@ -57,7 +57,7 @@ func (this *UserProcess)Login(account string, password string) (err error) {
 		return
 	}
 	if loginRspMsg.Status == "OK" {
-		fmt.Println("登陆成功，欢迎您admin")
+		fmt.Println("登陆成功，欢迎您", account)
 	} else {
 		fmt.Println(loginRspMsg.Status)
 	}
@@ -65,7 +65,7 @@ func (this *UserProcess)Login(account string, password string) (err error) {
 	return nil
 }
 
-func (this *UserProcess)Register(account string, password string) (err error) {
+func (u *UserProcess)Register(account string, password string) (err error) {
 	conn, err := net.Dial("tcp", "127.0.0.1:10000")
 	if err != nil {
 		return
