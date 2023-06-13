@@ -3,6 +3,7 @@ package process
 import (
 	"chatroom/common/message"
 	"chatroom/common/packio"
+	"chatroom/server/model"
 	"encoding/json"
 	"errors"
 	"net"
@@ -21,12 +22,15 @@ func (this *UserProcess)ProcessLogin(msg *message.Message) (err error) {
 	}
 
 	var loginRsp message.LoginRspMesssage
-	if loginMsg.Account == "admin" && loginMsg.Password == "password" {
-		loginRsp.Code = message.LoginSuccess
+	loginRsp.Code = message.LoginSuccess
+
+	dao := model.GetUserDao()
+	err = dao.CheckLogin(loginMsg.Account, loginMsg.Password)
+
+	if err == nil {
 		loginRsp.Status = "OK"
 	} else {
-		loginRsp.Code = message.LoginUserNotExist
-		loginRsp.Status = "ERROR"
+		loginRsp.Status = err.Error()
 	}
 
 	loginRspslice, err := json.Marshal(loginRsp)

@@ -3,7 +3,13 @@ package main
 import (
 	"fmt"
 	"net"
+	"time"
 )
+
+func init() {
+	initRedisPool("localhost:6379", 16, 0, 300 * time.Second)
+	initUserDao(pool)
+}
 
 func main() {
 	listen, err := net.Listen("tcp", "127.0.0.1:10000")
