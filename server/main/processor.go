@@ -45,9 +45,9 @@ func (this *processor)processMsg(msg *message.Message) (err error) {
 	}
 	switch msg.Type {
 		case message.LoginType :
-			err = pro.ProcessLogin(msg)
+			err = pro.ProcessLogin(msg.Content)
 		case message.RegisterType :
-			err = pro.ProcessRegister(msg)
+			err = pro.ProcessRegister(msg.Content)
 		default :
 			err = errors.New("不存在的msg类型")	
 	}

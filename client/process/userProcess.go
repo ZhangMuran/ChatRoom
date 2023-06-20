@@ -13,6 +13,19 @@ type UserProcess struct {
 
 }
 
+func (u *UserProcess)showOnlineUser(onlineUsers *[]string) {
+	if len(*onlineUsers) == 0 {
+		fmt.Println("暂时还没有其他用户在线哦")
+		return
+	}
+
+	fmt.Println("目前在线的用户有：", len(*onlineUsers))
+	for _, id := range *onlineUsers {
+		fmt.Println(id)
+	}
+	fmt.Println("快去找他们聊聊吧！")
+}
+
 func (u *UserProcess)Login(account string, password string) (err error) {
 	conn, err := net.Dial("tcp", "127.0.0.1:10000")
 	if err != nil {
@@ -58,6 +71,7 @@ func (u *UserProcess)Login(account string, password string) (err error) {
 	}
 	if loginRspMsg.Status == "OK" {
 		fmt.Println("登陆成功，欢迎您", account)
+		u.showOnlineUser(&loginRspMsg.OnlineUsers)
 	} else {
 		fmt.Println(loginRspMsg.Status)
 	}

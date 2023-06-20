@@ -12,11 +12,16 @@ import (
 
 type UserProcess struct {
 	Conn net.Conn
+	account string
 }
 
-func (u *UserProcess)ProcessLogin(msg *message.Message) (err error) {
+/*
+ * 服务器处理用户的登陆操作，并根据处理结果回复消息给客户端
+ * @params: json序列化成string格式的LoginMessage
+ */
+func (u *UserProcess)ProcessLogin(msg string) (err error) {
 	var loginMsg message.LoginMessage
-	err = json.Unmarshal([]byte(msg.Content), &loginMsg)
+	err = json.Unmarshal([]byte(msg), &loginMsg)
 	if err != nil {
 		err = errors.New("反序列化LoginMessage失败")
 		return
@@ -30,6 +35,12 @@ func (u *UserProcess)ProcessLogin(msg *message.Message) (err error) {
 
 	if err == nil {
 		loginRsp.Status = "OK"
+		for id, _ := range onlineUser.onlineMap {
+			fmt.Println(id)
+			loginRsp.OnlineUsers = append(loginRsp.OnlineUsers, id)
+		}
+		u.account = loginMsg.Account
+		onlineUser.addOnlineUser(u)
 	} else {
 		loginRsp.Code = message.LoginFail
 		loginRsp.Status = err.Error()
@@ -61,9 +72,13 @@ func (u *UserProcess)ProcessLogin(msg *message.Message) (err error) {
 	return
 }
 
-func (u *UserProcess)ProcessRegister(msg *message.Message) (err error) {
+/*
+ * 服务器处理用户的注册操作，并根据处理结果回复消息给客户端
+ * @params: json序列化成string格式的RegisterMessage
+ */
+func (u *UserProcess)ProcessRegister(msg string) (err error) {
 	var registerMsg message.RegisterMessage
-	err = json.Unmarshal([]byte(msg.Content), &registerMsg)
+	err = json.Unmarshal([]byte(msg), &registerMsg)
 	if err != nil {
 		err = errors.New("反序列化RegisterMessage失败")
 		return

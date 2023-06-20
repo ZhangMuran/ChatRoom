@@ -25,8 +25,9 @@ type LoginMessage struct {
 }
 
 type LoginRspMessage struct {
-	Code int      `json:"code"`
-	Status string `json:"status"`
+	Code int             `json:"code"`
+	Status string        `json:"status"`
+	OnlineUsers []string `json:"online_user"`
 }
 
 type RegisterMessage struct {
