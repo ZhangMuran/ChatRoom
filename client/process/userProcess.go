@@ -1,8 +1,8 @@
 package process
 
 import (
+	"chatroom/client/utils/menu"
 	"chatroom/common/message"
-	"chatroom/common/packio"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -10,7 +10,18 @@ import (
 )
 
 type UserProcess struct {
+}
 
+// 开一个协程持续接收服务器发送的消息
+func ListenServer(pio *message.PackIo) {
+	for {
+		fmt.Println("持续接收服务器消息中")
+		msg, err := pio.RecvPack()
+		if err != nil {
+			fmt.Println(err)
+		}
+		msg.Parse()
+	}
 }
 
 func (u *UserProcess)showOnlineUser(onlineUsers *[]string) {
@@ -49,7 +60,7 @@ func (u *UserProcess)Login(account string, password string) (err error) {
 		return
 	}
 
-	pio := packio.PackIo{
+	pio := message.PackIo{
 		Conn: conn,
 	}
 	err = pio.SendPack(data)
@@ -69,14 +80,17 @@ func (u *UserProcess)Login(account string, password string) (err error) {
 		err = errors.New("反序列化loginRspMessage出错")
 		return
 	}
-	if loginRspMsg.Status == "OK" {
-		fmt.Println("登陆成功，欢迎您", account)
-		u.showOnlineUser(&loginRspMsg.OnlineUsers)
-	} else {
+	if loginRspMsg.Status != "OK" {
 		fmt.Println(loginRspMsg.Status)
+		return
 	}
 
-	return nil
+	fmt.Println("登陆成功，欢迎您", account)
+	u.showOnlineUser(&loginRspMsg.OnlineUsers)
+	menu.AfterLogin()
+	go ListenServer(&pio)
+
+	return
 }
 
 func (u *UserProcess)Register(account string, password string) (err error) {
@@ -102,7 +116,7 @@ func (u *UserProcess)Register(account string, password string) (err error) {
 		return
 	}
 
-	pio := packio.PackIo{
+	pio := message.PackIo{
 		Conn: conn,
 	}
 	err = pio.SendPack(data)

@@ -2,7 +2,6 @@ package process
 
 import (
 	"chatroom/common/message"
-	"chatroom/common/packio"
 	"chatroom/server/model"
 	"encoding/json"
 	"errors"
@@ -11,7 +10,7 @@ import (
 )
 
 type UserProcess struct {
-	Conn net.Conn
+	Conn    net.Conn
 	account string
 }
 
@@ -19,7 +18,7 @@ type UserProcess struct {
  * 服务器处理用户的登陆操作，并根据处理结果回复消息给客户端
  * @params: json序列化成string格式的LoginMessage
  */
-func (u *UserProcess)ProcessLogin(msg string) (err error) {
+func (u *UserProcess) ProcessLogin(msg string) (err error) {
 	var loginMsg message.LoginMessage
 	err = json.Unmarshal([]byte(msg), &loginMsg)
 	if err != nil {
@@ -33,13 +32,29 @@ func (u *UserProcess)ProcessLogin(msg string) (err error) {
 	dao := model.GetUserDao()
 	err = dao.CheckLogin(loginMsg.Account, loginMsg.Password)
 
+	// 成功登录，需要展示所有在线成员，并提醒所有人该用户上线
 	if err == nil {
 		loginRsp.Status = "OK"
-		for id, _ := range onlineUser.onlineMap {
-			fmt.Println(id)
-			loginRsp.OnlineUsers = append(loginRsp.OnlineUsers, id)
-		}
+
 		u.account = loginMsg.Account
+		notifymsg := message.NotifyOnlineMessage{
+			User: message.User{
+				Account: u.account,
+				Status:  message.OnLine,
+			},
+		}
+		// var nMsg message.Message
+		nMsg, err := notifymsg.Bind()
+		if err != nil {
+			return
+		}
+
+		for id, up := range onlineUser.onlineMap {
+			// 在loginRsp中增加在线成员的切片，使客户端可以看到在线列表
+			loginRsp.OnlineUsers = append(loginRsp.OnlineUsers, id)
+			// 向所有在线成员发送notify消息，通知新用户上线
+			nMsg.Send(up.Conn)
+		}
 		onlineUser.addOnlineUser(u)
 	} else {
 		loginRsp.Code = message.LoginFail
@@ -48,7 +63,7 @@ func (u *UserProcess)ProcessLogin(msg string) (err error) {
 
 	loginRspslice, err := json.Marshal(loginRsp)
 	if err != nil {
-		err =  errors.New("序列化LoginRspMessage失败")
+		err = errors.New("序列化LoginRspMessage失败")
 		return
 	}
 
@@ -59,7 +74,7 @@ func (u *UserProcess)ProcessLogin(msg string) (err error) {
 		return
 	}
 
-	pio := &packio.PackIo{
+	pio := &message.PackIo{
 		Conn: u.Conn,
 	}
 
@@ -76,14 +91,14 @@ func (u *UserProcess)ProcessLogin(msg string) (err error) {
  * 服务器处理用户的注册操作，并根据处理结果回复消息给客户端
  * @params: json序列化成string格式的RegisterMessage
  */
-func (u *UserProcess)ProcessRegister(msg string) (err error) {
+func (u *UserProcess) ProcessRegister(msg string) (err error) {
 	var registerMsg message.RegisterMessage
 	err = json.Unmarshal([]byte(msg), &registerMsg)
 	if err != nil {
 		err = errors.New("反序列化RegisterMessage失败")
 		return
 	}
-	
+
 	var registerRsp message.RegisterRspMessage
 	registerRsp.Code = message.RegisterSuccess
 
@@ -110,7 +125,7 @@ func (u *UserProcess)ProcessRegister(msg string) (err error) {
 		return
 	}
 
-	pio := &packio.PackIo{
+	pio := &message.PackIo{
 		Conn: u.Conn,
 	}
 

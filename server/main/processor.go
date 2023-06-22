@@ -2,7 +2,6 @@ package main
 
 import (
 	"chatroom/common/message"
-	"chatroom/common/packio"
 	"chatroom/server/process"
 	"errors"
 	"fmt"
@@ -17,7 +16,7 @@ type processor struct {
 func (this *processor)clientConn() {
 	defer this.conn.Close()
 	
-	pio := &packio.PackIo{
+	pio := &message.PackIo{
 		Conn: this.conn,
 	}
 	for {
