@@ -18,7 +18,7 @@ func ListenServer(pio *message.PackIo) {
 		fmt.Println("持续接收服务器消息中")
 		msg, err := pio.RecvPack()
 		if err != nil {
-			fmt.Println(err)
+			fmt.Println("err =", err)
 		}
 		msg.Parse()
 	}
@@ -30,7 +30,7 @@ func (u *UserProcess)showOnlineUser(onlineUsers *[]string) {
 		return
 	}
 
-	fmt.Println("目前在线的用户有：", len(*onlineUsers))
+	fmt.Println("目前在线的用户数量：", len(*onlineUsers))
 	for _, id := range *onlineUsers {
 		fmt.Println(id)
 	}
@@ -87,9 +87,24 @@ func (u *UserProcess)Login(account string, password string) (err error) {
 
 	fmt.Println("登陆成功，欢迎您", account)
 	u.showOnlineUser(&loginRspMsg.OnlineUsers)
-	menu.AfterLogin()
 	go ListenServer(&pio)
 
+	var num int
+	for {
+		for {
+			if num = menu.AfterLogin(); num != -1 {
+				break
+			}
+		}
+		
+		if num == 1 {
+			u.showOnlineUser(&loginRspMsg.OnlineUsers)
+		} else {
+			break
+		}
+	}
+	
+	
 	return
 }
 

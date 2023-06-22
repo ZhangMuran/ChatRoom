@@ -31,7 +31,7 @@ func Home() int {
 
 func AfterLogin() int {
 	fmt.Println("------------------------------------------")
-	fmt.Println("\txxx，欢迎回来")
+	fmt.Println("\t\txxx，欢迎回来")
 	fmt.Println("\t\t1. 显示在线用户列表")
 	fmt.Println("\t\t2. 发送消息")
 	fmt.Println("\t\t3. 消息列表")
@@ -41,11 +41,13 @@ func AfterLogin() int {
 	fmt.Scanln(&num)
 	switch num {
 		case 1 :
-			fmt.Println("目前在线的用户有: ")
+			
 		case 2 :
 			fmt.Println("发送消息")
+			num = -1
 		case 3 :
 			fmt.Println("消息列表")
+			num = -1
 		case 4 :
 			fmt.Println("退出系统")
 			os.Exit(0)
