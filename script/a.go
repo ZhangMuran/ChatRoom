@@ -2,6 +2,9 @@ package main
 
 import "fmt"
 
-func init() {
-	fmt.Println("123")
+func main() {
+	mp := make(map[string]string)
+	mp["123"] = "345"
+	delete(mp, "123")
+	fmt.Println(mp)
 }

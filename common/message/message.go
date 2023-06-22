@@ -90,6 +90,7 @@ type NotifyOnlineMessage struct {
 
 // 将该消息绑定到Message类型中并返回Message
 func (n *NotifyOnlineMessage)Bind() (msg *Message, err error) {
+	msg = &Message{}
 	x, err := json.Marshal(*n)
 	if err != nil {
 		return
@@ -105,19 +106,19 @@ type PackIo struct {
 	buf [2048]byte
 }
 
-func (this *PackIo)SendPack(data []byte) (err error) {
+func (p *PackIo)SendPack(data []byte) (err error) {
 	// 为了避免粘包，在发送数据时先发送数据的长度
 	msgLen := uint32(len(data))
 	var byteslice [4]byte 
 	binary.BigEndian.PutUint32(byteslice[:], msgLen)
 
-	_, err = this.Conn.Write(byteslice[:])
+	_, err = p.Conn.Write(byteslice[:])
 	if err != nil {
 		err = errors.New("发送报文长度时出错")
 		return
 	}
 
-	_, err = this.Conn.Write(data)
+	_, err = p.Conn.Write(data)
 	if err != nil {
 		err = errors.New("发送报文内容时出错")
 		return
@@ -125,19 +126,23 @@ func (this *PackIo)SendPack(data []byte) (err error) {
 	return
 }
 
-func (this *PackIo)RecvPack() (msg Message, err error){
-	_, err = this.Conn.Read(this.buf[:4])
+func (p *PackIo)RecvPack() (msg Message, err error){
+	_, err = p.Conn.Read(p.buf[:4])
 	if err != nil {
 		if err == io.EOF {
 			return
 		}
+		fmt.Println(err)
 		err = errors.New("读取报文长度出错")
 		return
 	}
-	numLen := binary.BigEndian.Uint32(this.buf[:4])
+	numLen := binary.BigEndian.Uint32(p.buf[:4])
 
-	_, err = this.Conn.Read(this.buf[:numLen])
-	err = json.Unmarshal(this.buf[:numLen], &msg)
+	_, err = p.Conn.Read(p.buf[:numLen])
+	if err != nil {
+		return
+	}
+	err = json.Unmarshal(p.buf[:numLen], &msg)
 	if err != nil {
 		err = errors.New("接受报文反序列化过程出错")
 		return

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"chatroom/server/process"
 	"fmt"
 	"net"
 	"time"
@@ -25,9 +26,10 @@ func main() {
 			fmt.Println("与客户端连接出错! err =", err)
 			continue
 		}
-		connect := &processor{
-			conn: conn,
+
+		connect := &process.Processor{
+			Conn: conn,
 		}
-		go connect.clientConn()
+		go connect.ClientConn()
 	}
 }
