@@ -5,7 +5,6 @@ import (
 	"os"
 )
 
-
 func Home() int {
 	fmt.Println("------------------------------------------")
 	fmt.Println("\t请输入:")
@@ -43,8 +42,7 @@ func AfterLogin() int {
 		case 1 :
 			
 		case 2 :
-			fmt.Println("发送消息")
-			num = -1
+			fmt.Println("群聊模式")
 		case 3 :
 			fmt.Println("消息列表")
 			num = -1

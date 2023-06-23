@@ -1,6 +1,8 @@
 package process
 
-import "fmt"
+import (
+	"fmt"
+)
 
 type onlineUserManage struct{
 	onlineMap map[string]*Processor

@@ -13,7 +13,7 @@ func init() {
 }
 
 func main() {
-	listen, err := net.Listen("tcp", "127.0.0.1:10000")
+	listen, err := net.Listen("tcp", "127.0.0.1:12345")
 	if err != nil {
 		fmt.Println("listen error, err =", err)
 		return

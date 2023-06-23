@@ -1,7 +1,6 @@
 package process
 
 import (
-	"chatroom/client/utils/menu"
 	"chatroom/common/message"
 	"encoding/json"
 	"errors"
@@ -20,64 +19,45 @@ func ListenServer(pio *message.PackIo) {
 		if err != nil {
 			fmt.Println("err =", err)
 		}
-		msg.Parse()
+		ProcessMessage(msg)
 	}
-}
-
-func (u *UserProcess)showOnlineUser(onlineUsers *[]string) {
-	if len(*onlineUsers) == 0 {
-		fmt.Println("暂时还没有其他用户在线哦")
-		return
-	}
-
-	fmt.Println("目前在线的用户数量：", len(*onlineUsers))
-	for _, id := range *onlineUsers {
-		fmt.Println(id)
-	}
-	fmt.Println("快去找他们聊聊吧！")
 }
 
 func (u *UserProcess)Login(account string, password string) (err error) {
-	conn, err := net.Dial("tcp", "127.0.0.1:10000")
+	conn, err := net.Dial("tcp", "127.0.0.1:12345")
 	if err != nil {
 		return
 	}
 	defer conn.Close()
 
-	userInfo := message.LoginMessage{Account:account, Password:password}
-	data, err := json.Marshal(userInfo)
+	userInfo := message.LoginMessage{
+		Account:account, 
+		Password:password,
+	}
+
+	msg, err := userInfo.Bind()
 	if err != nil {
-		err = errors.New("序列化LoginMessage失败")
 		return
 	}
-	var msg message.Message
-	msg.Type = message.LoginType
-	msg.Content = string(data)
 
-	data, err = json.Marshal(msg)
+	err = msg.Send(conn)
 	if err != nil {
-		err = errors.New("发送登陆消息过程中，序列化message失败")
 		return
 	}
 
 	pio := message.PackIo{
 		Conn: conn,
 	}
-	err = pio.SendPack(data)
-	if err != nil {
-		err = errors.New("发送loginMessage包出错")
-		return
-	}
 	rspMsg, err := pio.RecvPack()
 	if err != nil {
-		err = errors.New("接收loginRspMessage出错")
+		fmt.Println("接收服务器发来的登录结果信息失败")
 		return
 	}
 
 	var loginRspMsg message.LoginRspMessage
 	err = json.Unmarshal([]byte(rspMsg.Content), &loginRspMsg)
 	if err != nil {
-		err = errors.New("反序列化loginRspMessage出错")
+		fmt.Println("反序列化loginRspMessage出错")
 		return
 	}
 	if loginRspMsg.Status != "OK" {
@@ -86,30 +66,18 @@ func (u *UserProcess)Login(account string, password string) (err error) {
 	}
 
 	fmt.Println("登陆成功，欢迎您", account)
-	u.showOnlineUser(&loginRspMsg.OnlineUsers)
+	MyInfo.Account = account
+	MyInfo.Conn = conn
+	MyInfo.InitFriend(&loginRspMsg.OnlineUsers)
+	MyInfo.ShowOnlineFriend()
 	go ListenServer(&pio)
-
-	var num int
-	for {
-		for {
-			if num = menu.AfterLogin(); num != -1 {
-				break
-			}
-		}
-		
-		if num == 1 {
-			u.showOnlineUser(&loginRspMsg.OnlineUsers)
-		} else {
-			break
-		}
-	}
 	
-	
+	ShowLogin()
 	return
 }
 
 func (u *UserProcess)Register(account string, password string) (err error) {
-	conn, err := net.Dial("tcp", "127.0.0.1:10000")
+	conn, err := net.Dial("tcp", "127.0.0.1:12345")
 	if err != nil {
 		return
 	}

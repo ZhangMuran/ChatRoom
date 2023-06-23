@@ -49,6 +49,8 @@ func (p *Processor)processMsg(msg *message.Message) (err error) {
 			err = p.ProcessLogin(msg.Content)
 		case message.RegisterType :
 			err = p.ProcessRegister(msg.Content)
+		case message.SmsSendType :
+			err = p.ProcessSendSms(msg.Content)
 		default :
 			err = errors.New("不存在的msg类型")	
 	}
@@ -178,5 +180,35 @@ func (p *Processor) ProcessRegister(msg string) (err error) {
 		return
 	}
 
+	return
+}
+
+func (p *Processor)ProcessSendSms(msg string) (err error) {
+	var smsMessage message.SmsMessage
+	err = json.Unmarshal([]byte(msg), &smsMessage)
+	if err != nil {
+		return
+	}
+
+	for _, account := range smsMessage.Users {
+		var up *Processor
+		up, err = OnlineUser.GetInfoByAccount(account)
+		if err != nil {
+			continue
+		}
+		sendMsg := message.SmsMessage {
+			Content: smsMessage.Content,
+		}
+		var message *message.Message
+		message, err = sendMsg.Bind()
+		if err != nil {
+			return
+		}
+
+		err = message.Send(up.Conn)
+		if err != nil {
+			return
+		}
+	}
 	return
 }
